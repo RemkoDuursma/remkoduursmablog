@@ -1,6 +1,6 @@
 ---
 title: "About"
-date: "2016-05-05T21:48:51-07:00"
+date: "2017-04-20T21:48:51-07:00"
 ---
 
-This is a "hello world" example website for the [**blogdown**](https://github.com/rstudio/blogdown) package. The theme was forked from [@jrutheiser/hugo-lithium-theme](https://github.com/jrutheiser/hugo-lithium-theme) and modified by [Yihui Xie](https://github.com/yihui/hugo-lithium-theme).
+This is Remko Duursma's blog on everything R. Most content arises from teaching R and data analysis at the Hawkesbury Institute for the Environment, at Western Sydney University. For an unofficial site with teaching materials, visit [](www.hiercourse.com).

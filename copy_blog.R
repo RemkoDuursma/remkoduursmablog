@@ -1,8 +1,4 @@
-copy_blog <- function(){
-  
-  fn <- dir("public", full.names = TRUE, recursive = TRUE)  
-  
-  ii <- file.copy(fn, "c:/repos/remkoduursma.github.io/blog", overwrite=TRUE)
+fix_rss <- function(){
   
   rss <- "c:/repos/remkoduursma.github.io/blog/index.xml"
   r <- readLines(rss, warn=FALSE)
@@ -11,5 +7,4 @@ copy_blog <- function(){
   }
   writeLines(r, rss)
   
-return(all(ii))
 }
