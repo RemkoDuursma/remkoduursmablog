@@ -1,0 +1,38 @@
+---
+title: "Introducing the nlshelper package"
+author: "Remko Duursma"
+date: 2017-04-24
+categories: ["R"]
+tags: ["plot", "regression", "nonlinear"]
+---
+
+
+<p>I recently organized a workshop on non-linear regression with R, covering the fundamentals and a few extras. When preparing the handout (which is <a href="http://www.hiercourse.com/nonlinear">available here</a> as a PDF), I realized it is actually quite cumbersome to plot a fitted model with <code>nls</code>, together with the data. To make this process easier, I wrote a simple package - <code>nlshelper</code> - which does just that and a few other things. Read on for a simple demonstration, or visit the <a href="https://github.com/remkoduursma/nlshelper">Github repository</a> here. The package is also on CRAN.</p>
+<div id="plotting-a-single-fitted-curve" class="section level1">
+<h1>Plotting a single fitted curve</h1>
+<p>The main motivation for writing this package was to quickly be able to plot a fitted curve on top of the data. The <code>nlstools</code> package does already provide this functionality via <code>plotfit</code> but I found that function to be somewhat inflexible, and it also does not accept models fit with <code>nlsList</code> (more on that below).</p>
+<p>The following example fits the Chapman-Richards equation to the <code>Loblolly</code> dataset, and plot the fitted curve with the data.</p>
+<pre class="r"><code># Define function to fit
+chapm &lt;- function(x,Asym,b,c)Asym*(1-exp(-b*x))^c
+
+# Fit model
+# Note the specification of the starting values.
+nls_lob &lt;- nls(height ~ chapm(age, Asym, b,c),
+               data=Loblolly,
+               start=list(Asym=100, b=0.1, c=2.5))
+
+# Plot fitted curve
+library(nlshelper)
+plot_nls(nls_lob, pch=16, points.col=&quot;cornflowerblue&quot;)</code></pre>
+<p><img src="/post/2017-04-24-nlshelper_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+</div>
+<div id="plotting-a-loess-model" class="section level1">
+<h1>Plotting a loess model</h1>
+<p>After having implemented the simple <code>plot_nls</code> function, it turned out that it can be used (or easily modified) for other objects, including those fit with <code>loess</code> or even non-linear quantile regression (<code>nlrq</code> from <code>quantreg</code>).</p>
+<pre class="r"><code>library(nlshelper)
+library(nlme)
+chick &lt;- as.data.frame(ChickWeight)
+fit1 &lt;- nlsList(weight ~ a*Time^b|Diet, data=chick, start=list(a=10, b=1.1))
+plot_nls(fit1)</code></pre>
+<p><img src="/post/2017-04-24-nlshelper_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+</div>
