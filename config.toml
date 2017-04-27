@@ -1,12 +1,13 @@
-baseurl = "http://www.remkoduursma.com/blog"
+baseurl = "http://www.remkoduursma.com/blog/"
 relativeurls = true
 languageCode = "en-us"
 paginate = 3
 title = "The R is for Remko"
 theme = "hugo-future-imperfect"
 googleAnalytics = ""
-disqusShortname = ""
+disqusShortname = "www-remkoduursma-com-blog"
 ignoreFiles = ["\\.Rmd$", "_files$", "_cache$"]
+publishDir = "c:/repos/remkoduursma.github.io/blog"
 
 [author]
     name = "Remko Duursma"
@@ -71,5 +72,4 @@ ignoreFiles = ["\\.Rmd$", "_files$", "_cache$"]
 [social]
     bitbucket       = "remkoduursma"
     github          = "remkoduursma"
-	
 	
