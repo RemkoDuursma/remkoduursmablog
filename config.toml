@@ -5,7 +5,7 @@ paginate = 3
 title = "The R is for Remko"
 theme = "hugo-future-imperfect"
 googleAnalytics = ""
-disqusShortname = "www-remkoduursma-com-blog"
+disqusShortname = ""
 ignoreFiles = ["\\.Rmd$", "_files$", "_cache$"]
 publishDir = "c:/repos/remkoduursma.github.io/blog"
 
