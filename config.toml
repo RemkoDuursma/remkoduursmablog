@@ -55,7 +55,7 @@ publishDir = "c:/repos/remkoduursma.github.io/blog"
     src       = "/img/main/logo.jpg"
     # modify your picture in the shape of a circle or
     # future imperfect's hexagonal shape
-    circle    = false
+    circle    = true
     imperfect = true
     width     = ""
     alt       = "Remko"
