@@ -7,7 +7,7 @@ tags: ["plot", "regression", "nonlinear"]
 ---
 
 
-<p>I recently organized a workshop on non-linear regression with R, covering the fundamentals and a few extras. When preparing the handout (which is <a href="http://www.hiercourse.com/nonlinear">available here</a> as a PDF), I realized it is actually quite cumbersome to plot a fitted model with <code>nls</code>, together with the data. To make this process easier, I wrote a simple package - <code>nlshelper</code> - which does just that and a few other things. Read on for a simple demonstration, or visit the <a href="https://github.com/remkoduursma/nlshelper">Github repository</a> here. The package is also on CRAN.</p>
+<p>I recently organized a workshop on non-linear regression with R, covering the fundamentals and a few extras. When preparing the handout (which is <a href="http://www.hiercourse.com/nonlinear">available here</a> as a PDF), I realized it is actually quite cumbersome to plot a fitted model with <code>nls</code>, together with the data. To make this process easier, I wrote a simple package - <code>nlshelper</code> - which does just that and a few other things. Read on for a simple demonstration, or visit the <a href="https://github.com/remkoduursma/nlshelper">Github repository</a> here, or read the full chapter in the link above. The package is also on CRAN.</p>
 <div id="plotting-a-single-fitted-curve" class="section level1">
 <h1>Plotting a single fitted curve</h1>
 <p>The main motivation for writing this package was to quickly be able to plot a fitted curve on top of the data, but has since grown to include a few extra tools. The <code>nlstools</code> package can already be used for plotting, with <code>plotfit</code>, but it is a little inflexible, and it also does not accept models fit with <code>nlsList</code> (more on that below).</p>
@@ -96,6 +96,14 @@ tidy(pur1, conf.int=TRUE)
 
 # A plot of the fitted model
 palette(c(&quot;#3BB8C4&quot;,&quot;#FF3D2F&quot;))
-plot_nls(pur1, pch=19, xlim=c(0,1.2))</code></pre>
+plot_nls(pur1, pch=19, xlim=c(0,1.2))
+
+# A future version of the package may include an automatic legend...
+legend(&quot;bottomright&quot;, names(pur1), pch=19, col=palette())</code></pre>
 <p><img src="/post/2017-04-24-nlshelper_files/figure-html/unnamed-chunk-5-1.png" width="576" /></p>
+<p>I have a few developments planned for the <code>nlshelper</code> package including:</p>
+<ul>
+<li>Methods for non-linear mixed-effects models</li>
+<li>Computation and plotting of confidence intervals for the fitted line, based on the bootstrap (much like the <code>fitplc</code> package does for very specific non-linear regressions, <a href="http://jplanthydro.org/article/view/1541">see our paper here</a>)</li>
+</ul>
 </div>

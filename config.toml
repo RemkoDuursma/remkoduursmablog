@@ -17,13 +17,16 @@ publishDir = "c:/repos/remkoduursma.github.io/blog"
     post = "/:year/:month/:day/:slug/"
 
 [[menu.main]]
-    name = "About"
-    url = "/about/"
+    name = "Blog"
+    url = "http://www.remkoduursma.com/blog"
+    identifier = "fa fa-book"
+    weight = 1
 	
 [[menu.main]]
     name = "Home"
     url = "http://www.remkoduursma.com"
-	identifier = "fa fa-home-o"
+	  identifier = "fa fa-home"
+	  weight = 2
 
 [params]
     description = "Remko Duursma's Blog for everything R"
@@ -33,7 +36,7 @@ publishDir = "c:/repos/remkoduursma.github.io/blog"
     socialAppearAtBottom = true
 	
     # set this to the section name if section is not post
-    viewMorePostLink     = "/post"
+    viewMorePostLink     = "/blog/post"
 
     [params.logo]
     url = "logo.png"
@@ -63,7 +66,7 @@ publishDir = "c:/repos/remkoduursma.github.io/blog"
 # Adjust the amount of recent posts on the sidebar.
 # This is optional. The default value 5 will be used
 [params.postAmount]
-    sidebar = 2
+    sidebar = 5
 
 
 # Insert your username and the icon will apear on the page as long as

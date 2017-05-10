@@ -11,7 +11,7 @@ knitr::opts_chunk$set(collapse = TRUE, message= FALSE, warning=FALSE, fig.width=
 ```
 
 
-I recently organized a workshop on non-linear regression with R, covering the fundamentals and a few extras. When preparing the handout (which is [available here](http://www.hiercourse.com/nonlinear) as a PDF), I realized it is actually quite cumbersome to plot a fitted model with `nls`, together with the data. To make this process easier, I wrote a simple package - `nlshelper` - which does just that and a few other things. Read on for a simple demonstration, or visit the [Github repository](https://github.com/remkoduursma/nlshelper) here. The package is also on CRAN. 
+I recently organized a workshop on non-linear regression with R, covering the fundamentals and a few extras. When preparing the handout (which is [available here](http://www.hiercourse.com/nonlinear) as a PDF), I realized it is actually quite cumbersome to plot a fitted model with `nls`, together with the data. To make this process easier, I wrote a simple package - `nlshelper` - which does just that and a few other things. Read on for a simple demonstration, or visit the [Github repository](https://github.com/remkoduursma/nlshelper) here, or read the full chapter in the link above. The package is also on CRAN. 
 
 # Plotting a single fitted curve
 
@@ -105,7 +105,21 @@ tidy(pur1, conf.int=TRUE)
 # A plot of the fitted model
 palette(c("#3BB8C4","#FF3D2F"))
 plot_nls(pur1, pch=19, xlim=c(0,1.2))
+
+# A future version of the package may include an automatic legend...
+legend("bottomright", names(pur1), pch=19, col=palette())
 ```
+
+I have a few developments planned for the `nlshelper` package including:
+
+- Methods for non-linear mixed-effects models
+- Computation and plotting of confidence intervals for the fitted line, based on the bootstrap (much like the `fitplc` package does for very specific non-linear regressions, [see our paper here](http://jplanthydro.org/article/view/1541))
+
+
+
+
+
+
 
 
 
