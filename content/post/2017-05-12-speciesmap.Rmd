@@ -1,0 +1,198 @@
+---
+title: "Calculating species climate envelopes in R"
+author: "Remko Duursma"
+date: 2017-05-12
+categories: ["R"]
+tags: ["ecology", "rpackage"]
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, dpi=300, fig.width=2.5)
+```
+
+
+# The question
+
+It is often interesting to ask where species occur in relation to climate variables. In ecology, we often like to compare 'species from a dry climate' to a 'species from a wet climate', and put some numbers on it. For example, statements like "the mean rainfall for the species across its distribution is 1000mm". It may also be interesting to estimate quantiles of the rainfall or temperature, for example "mean annual rainfall for the species across its range was is between 200 - 400mm (95% quantile)". How do we get these numbers?
+
+# A naive and biased approach
+
+We may take the following simple approach:
+
+- Retrieve species occurrence records from wonderful sources like the [Atlas of Living Australia](ala.org.au) or [GBIF](www.gbif.org) (for global records), as longitude-latitude points.
+- At these exact point locations, extract long-term climate data from [WorldClim](www.worldclim.org).
+- For the (often many thousands) of observations, calculate your statistics of interest (mean MAP, mean MAT, quantiles, whatever).
+
+The problem with this approach lies in the nature of the species occurrence records. These observations are not where the species actually occurs, rather it is a heavily biased record of where the species has been observed to occur. In practice this means that some areas will be sampled heavily (areas close to major cities, national parks or research stations, next to roads - particularly in remote area, etc.). These [problems are well documented](http://onlinelibrary.wiley.com/doi/10.1890/07-2153.1/abstract).
+
+With biased occurrence records, climate metrics will be equally biased. For example it can be expected that remote (often dry) areas will be more often undersampled than populated (often wetter) areas, as well as coastal vs. inland areas.
+
+# An alternative approach
+
+To remove some of this bias, in particular oversampling/undersampling, we suggest converting the occurrence data into presence/absence grid cells, at the same spatial resolution as the resolution of Worldclim (10min = 18.6 x 18.6km at the equator) (Note: WorldClim has multiple resolutions available - for the moment I am just using the 10min data). Then, climate metrics can be calculated for the grid cells where the species is found to occur, regardless of how often it was sampled. This approach ensures that poorly sampled areas are equally weighted in the climate envelope estimates. 
+
+Note that neither this approach or the naive approach above is insured against wrong observations, outliers, or missing observations. More work can be done to clean raw occurrence data from ALA/GBIF, and in fact a lot of information is given by both databases in terms of data quality. In the following I simply use the records as-is.
+
+# Implementation in R
+
+I wrote a simple R package, `speciesmap` that retrieves species occurrences (via the excellent R packages `ALA4R` and `rgbif`),
+downloads WorldClim climate layers, rasterizes species occurrences, and extratcs climate variables at the species occurrences. 
+
+The package is not yet on CRAN, so you have to do:
+
+```{r, eval=FALSE}
+devtools::install_github("remkoduursma/speciesmap")
+```
+
+And simply load the package.
+
+```{r, message=FALSE}
+library(speciesmap)
+```
+
+The function `worldclim_presence` does all steps at once (see last section of this document), but I will show the individual steps first, for illustration of the process. I will show an example with some Australian tree species, but if you use `get_occurrences_gbif`, you can find any species globally. One difference worth noting is that GBIF is quite slow, but ALA is very fast.
+
+## Step 1. Get occurrences
+
+Using the `ALA4R` package, we can now quickly get all species occurrences in Australia. Within the functions defined in the script above, use the `get_occurrences_ala` function, like this.
+
+```{r}
+euca <- get_occurrences_ala("Eucalyptus camaldulensis")
+```
+
+A simple map is quickly produced:
+
+```{r, fig.cap="Raw occurrences for River red gum across Australia or a small section of SA (right panel).", echo=-1}
+library(oz)
+par(mfrow=c(1,2), mar=c(4,4,1,1))
+
+oz()
+with(euca, points(longitude, latitude, pch=".", col="red"))
+
+oz(xlim=c(138,139), ylim=c(-36, -32))
+with(euca, points(longitude, latitude, pch=".", col="red"))
+```
+
+For river red gum we can spot where major rivers are (especially note the Murray and Darling). Perhaps MAT and MAP are not the best metrics for the climate envelope for this species - but that's up to you to decide.
+
+## Step 2. Rasterize occurrences
+
+Next we make a raster of presences of the species occurrences. The following code does this for you, and note that the resolution can not be changed as it is fixed to the Worldclim resolution (for now - I intend to improve this in a future release).
+
+```{r}
+euca_ras <- rasterize_occurrences(euca)
+```
+
+The output from `rasterize_occurrences` is a dataframe with midpoint latitude/longitude for each cell where the species occurs at least once. It looks quite different from the map above.
+
+```{r, fig.cap="Rasterized occurrences for River red gum across Australia or a small section of SA (right panel).", echo=-1}
+par(mfrow=c(1,2), mar=c(4,4,1,1))
+
+oz()
+with(euca_ras, points(longitude, latitude, pch=".", col="red"))
+
+oz(xlim=c(138,139), ylim=c(-36, -32))
+with(euca_ras, points(longitude, latitude, pch=16, cex=0.3, col="red"))
+
+```
+
+It is also easy to see that the spatial weighting is quite different, as these simple frequency graphs show. We see heavy oversampling in the low latitudes, and to some extent in the East. 
+
+```{r, fig.cap="Frequency histograms of raw or rasterized occurrences by latitude or longitude for River red gum."}
+par(cex.main=0.9, mfrow=c(2,2), mar=c(4,4,1,1), mgp=c(2,0.5,0), tcl=0.2)
+hist(euca$longitude, xlim=c(90, 160), breaks=100, main="Raw occurrences", xlab="Longitude")
+hist(euca$latitude, xlim=c(-40,-10), breaks=100, main="Raw occurrences", xlab="Latitude")
+hist(euca_ras$longitude, xlim=c(90, 160), breaks=100, main="Rasterized", xlab="Longitude")
+hist(euca_ras$latitude, xlim=c(-40,-10), breaks=100, main="Rasterized", xlab="Latitude")
+```
+
+## Step 3. Extract Worldclim observations
+
+Next we can extract the climate observations from Worldclim. Some existing packages can do this as well, but I rewrote it as the existing implementations are slow and not very flexible. The first step is to download the layers from the online source, the function `get_worldclim_rasters` will download it to either a temporary file or a folder of your choosing (in which case the layers will not be downloaded each time). 
+
+Worldclim stores monthly long-term average precipitation, and temperature (mean, max, min). Here I extract only precipitation and mean temperature, some more work is needed to extract any of these variables as well as one of many 'bioclimatic' variables. You have the option to download annual averages and monthly values for every occurrence in the data, or return simple summaries (mean and quantiles of precip and temperature). This is controlled by the `return=` argument in the example below.
+
+You can use the function `get_worldclim_rasters` to download the layers, but you don't have to do that since other functions will run this for you.
+
+The following code extracts climate data for all raw occurrences and the rasterized version. I suggest adding an absolute path for the directory to store the WorldClim layers (for example,  `topath = "c:/mydata"`), so the layers are not redownloaded each time. I have omitted that here.
+
+In this particular example we see quite large differences in mean MAT across occurrence records between raw data and the rasterized version. We can also look at the distribution across occurrences, like this:
+
+```{r, message=FALSE}
+# Climate records for species occurrences (raw - not rasterized)
+clim_occ <- get_worldclim_prectemp(euca, return="all")
+
+# Climate records for rasterized occurrences
+clim_ras <- get_worldclim_prectemp(euca_ras, return="all")
+```
+
+It should be mentioned that these objects contain a row for every latitude/longitude pair in the dataset, and the output contains monthly variables (`prec_1`, `prec_2`, and `tmean_1` and so on), as well as annual averages temperature (MAT) and total precipitation (MAP).
+
+Finally you can see that the distribution of climate across the species' range is quite different when using the raw data or rasterized occurrences.
+
+```{r, fig.cap="Frequency histograms of mean annual temperature (MAT) or precipitation (MAP) across the raw occurrence locations or rasterized locations."}
+par(cex.main=0.9, mfrow=c(2,2), mar=c(4,4,1,1), mgp=c(2,0.5,0), tcl=0.2)
+with(clim_occ, hist(MAT, main="Raw occurrences", xlim=c(10, 30)))
+with(clim_occ, hist(MAP, main="Raw occurrences", xlim=c(0,1800)))
+with(clim_ras, hist(MAT, main="Rasterized", xlim=c(10, 30)))
+with(clim_ras, hist(MAP, main="Rasterized", xlim=c(0,1800)))
+```
+
+
+# Simple range maps and climate envelopes
+
+We can execute all 3 steps at once via,
+
+```{r, eval=FALSE}
+eute <- worldclim_presence("Eucalyptus tereticornis", return="summary")
+```
+
+which gives a dataframe with climate summaries for the rasterized locations.
+
+The `worldclim_presence` function is vectorized, so we can quickly run many species:
+
+```{r}
+eucs <- worldclim_presence(c("Eucalyptus tereticornis","Corymbia calophylla","Eucalyptus globulus"),
+                             return="summary")
+
+knitr::kable(eucs, digits=2)
+```
+
+Or even all (rasterized) occurrences with climate data with `return="all"`. Note that the result is a list of dataframes, one for every species.
+
+```{r}
+eucs <- worldclim_presence(c("Eucalyptus tereticornis","Corymbia calophylla","Eucalyptus globulus"),
+                             return="all")
+```
+
+We can use this list for a simple range map:
+
+```{r}
+library(oz)
+oz()
+
+palette(c("red2","cornflowerblue","forestgreen"))
+
+for(i in seq_along(eucs)){
+  with(eucs[[i]], points(longitude, latitude, pch=16, cex=0.2, col=palette()[i]))
+}
+legend("topleft", names(eucs), fill=palette(), cex=0.7)
+```
+
+Or to plot simple climate envelopes - the combination of MAT and MAP where the species occur. We can draw data ellipses on top (although the relevance of these can be argued in this case), using `dataEllipse` from the `car` package.
+
+```{r}
+plot(1, type='n', xlim=c(0,30), ylim=c(0,2500),
+     xlab="MAT", ylab="MAP")
+for(i in seq_along(eucs)){
+  with(eucs[[i]], points(MAT, MAP, pch=16, cex=0.8, col=palette()[i]))
+  
+  de <- as.data.frame(with(na.omit(eucs[[i]]), 
+             car::dataEllipse(MAT, MAP, draw=FALSE, levels=0.75)))
+  with(de, lines(x, y, col=palette()[i]))
+}
+legend("topleft", names(eucs), fill=palette(), cex=0.7)
+```
+
+
