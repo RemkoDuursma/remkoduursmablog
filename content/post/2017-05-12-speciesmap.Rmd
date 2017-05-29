@@ -8,7 +8,7 @@ tags: ["ecology", "rpackage"]
 
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, dpi=300, fig.width=2.5)
+knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
@@ -155,9 +155,9 @@ The `worldclim_presence` function is vectorized, so we can quickly run many spec
 ```{r}
 eucs <- worldclim_presence(c("Eucalyptus tereticornis","Corymbia calophylla","Eucalyptus globulus"),
                              return="summary")
-
-knitr::kable(eucs, digits=2)
 ```
+
+The `eucs` object is a dataframe with mean and 5, 95% quantiles of MAP and MAT across the (rasterized) range for each species.
 
 Or even all (rasterized) occurrences with climate data with `return="all"`. Note that the result is a list of dataframes, one for every species.
 

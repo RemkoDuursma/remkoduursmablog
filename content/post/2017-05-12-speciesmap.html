@@ -39,7 +39,7 @@ tags: ["ecology", "rpackage"]
 <h2>Step 1. Get occurrences</h2>
 <p>Using the <code>ALA4R</code> package, we can now quickly get all species occurrences in Australia. Within the functions defined in the script above, use the <code>get_occurrences_ala</code> function, like this.</p>
 <pre class="r"><code>euca &lt;- get_occurrences_ala(&quot;Eucalyptus camaldulensis&quot;)</code></pre>
-<pre><code>## INFO [2017-05-12 11:42:44] ALA returned 29803 records for Eucalyptus camaldulensis in 20 sec.</code></pre>
+<pre><code>## INFO [2017-05-29 15:43:27] ALA returned 29803 records for Eucalyptus camaldulensis in 16.9 sec.</code></pre>
 <p>A simple map is quickly produced:</p>
 <pre class="r"><code>par(mfrow=c(1,2), mar=c(4,4,1,1))
 
@@ -49,7 +49,7 @@ with(euca, points(longitude, latitude, pch=&quot;.&quot;, col=&quot;red&quot;))
 oz(xlim=c(138,139), ylim=c(-36, -32))
 with(euca, points(longitude, latitude, pch=&quot;.&quot;, col=&quot;red&quot;))</code></pre>
 <div class="figure"><span id="fig:unnamed-chunk-4"></span>
-<img src="/post/2017-05-12-speciesmap_files/figure-html/unnamed-chunk-4-1.png" alt="Raw occurrences for River red gum across Australia or a small section of SA (right panel)." width="750" />
+<img src="/post/2017-05-12-speciesmap_files/figure-html/unnamed-chunk-4-1.png" alt="Raw occurrences for River red gum across Australia or a small section of SA (right panel)." width="672" />
 <p class="caption">
 Figure 1: Raw occurrences for River red gum across Australia or a small section of SA (right panel).
 </p>
@@ -60,7 +60,7 @@ Figure 1: Raw occurrences for River red gum across Australia or a small section 
 <h2>Step 2. Rasterize occurrences</h2>
 <p>Next we make a raster of presences of the species occurrences. The following code does this for you, and note that the resolution can not be changed as it is fixed to the Worldclim resolution (for now - I intend to improve this in a future release).</p>
 <pre class="r"><code>euca_ras &lt;- rasterize_occurrences(euca)</code></pre>
-<pre><code>## INFO [2017-05-12 11:42:52] Rasterized 29803 occurrences into 3075 cells</code></pre>
+<pre><code>## INFO [2017-05-29 15:43:36] Rasterized 29803 occurrences into 3075 cells</code></pre>
 <p>The output from <code>rasterize_occurrences</code> is a dataframe with midpoint latitude/longitude for each cell where the species occurs at least once. It looks quite different from the map above.</p>
 <pre class="r"><code>oz()
 with(euca_ras, points(longitude, latitude, pch=&quot;.&quot;, col=&quot;red&quot;))
@@ -68,7 +68,7 @@ with(euca_ras, points(longitude, latitude, pch=&quot;.&quot;, col=&quot;red&quot
 oz(xlim=c(138,139), ylim=c(-36, -32))
 with(euca_ras, points(longitude, latitude, pch=16, cex=0.3, col=&quot;red&quot;))</code></pre>
 <div class="figure"><span id="fig:unnamed-chunk-6"></span>
-<img src="/post/2017-05-12-speciesmap_files/figure-html/unnamed-chunk-6-1.png" alt="Rasterized occurrences for River red gum across Australia or a small section of SA (right panel)." width="750" />
+<img src="/post/2017-05-12-speciesmap_files/figure-html/unnamed-chunk-6-1.png" alt="Rasterized occurrences for River red gum across Australia or a small section of SA (right panel)." width="672" />
 <p class="caption">
 Figure 2: Rasterized occurrences for River red gum across Australia or a small section of SA (right panel).
 </p>
@@ -80,7 +80,7 @@ hist(euca$latitude, xlim=c(-40,-10), breaks=100, main=&quot;Raw occurrences&quot
 hist(euca_ras$longitude, xlim=c(90, 160), breaks=100, main=&quot;Rasterized&quot;, xlab=&quot;Longitude&quot;)
 hist(euca_ras$latitude, xlim=c(-40,-10), breaks=100, main=&quot;Rasterized&quot;, xlab=&quot;Latitude&quot;)</code></pre>
 <div class="figure"><span id="fig:unnamed-chunk-7"></span>
-<img src="/post/2017-05-12-speciesmap_files/figure-html/unnamed-chunk-7-1.png" alt="Frequency histograms of raw or rasterized occurrences by latitude or longitude for River red gum." width="750" />
+<img src="/post/2017-05-12-speciesmap_files/figure-html/unnamed-chunk-7-1.png" alt="Frequency histograms of raw or rasterized occurrences by latitude or longitude for River red gum." width="672" />
 <p class="caption">
 Figure 3: Frequency histograms of raw or rasterized occurrences by latitude or longitude for River red gum.
 </p>
@@ -95,14 +95,14 @@ Figure 3: Frequency histograms of raw or rasterized occurrences by latitude or l
 <p>In this particular example we see quite large differences in mean MAT across occurrence records between raw data and the rasterized version. We can also look at the distribution across occurrences, like this:</p>
 <pre class="r"><code># Climate records for species occurrences (raw - not rasterized)
 clim_occ &lt;- get_worldclim_prectemp(euca, return=&quot;all&quot;)</code></pre>
-<pre><code>## INFO [2017-05-12 11:42:57] WorldClim raster tmean_10m_esri.zip downloaded.
-## INFO [2017-05-12 11:42:59] WorldClim raster prec_10m_esri.zip downloaded.
-## INFO [2017-05-12 11:42:59] WorldClim rasters read.
-## INFO [2017-05-12 11:43:05] Extracted 29803 records from WorldClim rasters.</code></pre>
+<pre><code>## INFO [2017-05-29 15:43:39] WorldClim raster tmean_10m_esri.zip downloaded.
+## INFO [2017-05-29 15:43:40] WorldClim raster prec_10m_esri.zip downloaded.
+## INFO [2017-05-29 15:43:41] WorldClim rasters read.
+## INFO [2017-05-29 15:43:46] Extracted 29803 records from WorldClim rasters.</code></pre>
 <pre class="r"><code># Climate records for rasterized occurrences
 clim_ras &lt;- get_worldclim_prectemp(euca_ras, return=&quot;all&quot;)</code></pre>
-<pre><code>## INFO [2017-05-12 11:43:05] WorldClim rasters read.
-## INFO [2017-05-12 11:43:09] Extracted 3075 records from WorldClim rasters.</code></pre>
+<pre><code>## INFO [2017-05-29 15:43:47] WorldClim rasters read.
+## INFO [2017-05-29 15:43:51] Extracted 3075 records from WorldClim rasters.</code></pre>
 <p>It should be mentioned that these objects contain a row for every latitude/longitude pair in the dataset, and the output contains monthly variables (<code>prec_1</code>, <code>prec_2</code>, and <code>tmean_1</code> and so on), as well as annual averages temperature (MAT) and total precipitation (MAP).</p>
 <p>Finally you can see that the distribution of climate across the species’ range is quite different when using the raw data or rasterized occurrences.</p>
 <pre class="r"><code>par(cex.main=0.9, mfrow=c(2,2), mar=c(4,4,1,1), mgp=c(2,0.5,0), tcl=0.2)
@@ -111,7 +111,7 @@ with(clim_occ, hist(MAP, main=&quot;Raw occurrences&quot;, xlim=c(0,1800)))
 with(clim_ras, hist(MAT, main=&quot;Rasterized&quot;, xlim=c(10, 30)))
 with(clim_ras, hist(MAP, main=&quot;Rasterized&quot;, xlim=c(0,1800)))</code></pre>
 <div class="figure"><span id="fig:unnamed-chunk-9"></span>
-<img src="/post/2017-05-12-speciesmap_files/figure-html/unnamed-chunk-9-1.png" alt="Frequency histograms of mean annual temperature (MAT) or precipitation (MAP) across the raw occurrence locations or rasterized locations." width="750" />
+<img src="/post/2017-05-12-speciesmap_files/figure-html/unnamed-chunk-9-1.png" alt="Frequency histograms of mean annual temperature (MAT) or precipitation (MAP) across the raw occurrence locations or rasterized locations." width="672" />
 <p class="caption">
 Figure 4: Frequency histograms of mean annual temperature (MAT) or precipitation (MAP) across the raw occurrence locations or rasterized locations.
 </p>
@@ -126,84 +126,30 @@ Figure 4: Frequency histograms of mean annual temperature (MAT) or precipitation
 <p>The <code>worldclim_presence</code> function is vectorized, so we can quickly run many species:</p>
 <pre class="r"><code>eucs &lt;- worldclim_presence(c(&quot;Eucalyptus tereticornis&quot;,&quot;Corymbia calophylla&quot;,&quot;Eucalyptus globulus&quot;),
                              return=&quot;summary&quot;)</code></pre>
-<pre><code>## INFO [2017-05-12 11:43:10] WorldClim rasters read.
-## INFO [2017-05-12 11:43:16] ALA returned 10041 records for Eucalyptus tereticornis in 5.2 sec.
-## INFO [2017-05-12 11:43:22] Rasterized 10041 occurrences into 985 cells
-## INFO [2017-05-12 11:43:26] Extracted 985 records from WorldClim rasters.
-## INFO [2017-05-12 11:43:28] ALA returned 3817 records for Corymbia calophylla in 2.1 sec.
-## INFO [2017-05-12 11:43:34] Rasterized 3817 occurrences into 257 cells
-## INFO [2017-05-12 11:43:38] Extracted 257 records from WorldClim rasters.
-## INFO [2017-05-12 11:43:43] ALA returned 8528 records for Eucalyptus globulus in 4 sec.
-## INFO [2017-05-12 11:43:49] Rasterized 8528 occurrences into 583 cells
-## INFO [2017-05-12 11:43:53] Extracted 583 records from WorldClim rasters.</code></pre>
-<pre class="r"><code>knitr::kable(eucs, digits=2)</code></pre>
-<table>
-<thead>
-<tr class="header">
-<th align="left">species</th>
-<th align="right">n</th>
-<th align="right">lat_mean</th>
-<th align="right">long_mean</th>
-<th align="right">MAT_mean</th>
-<th align="right">MAT_q05</th>
-<th align="right">MAT_q95</th>
-<th align="right">MAP_mean</th>
-<th align="right">MAP_q05</th>
-<th align="right">MAP_q95</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">Eucalyptus tereticornis</td>
-<td align="right">985</td>
-<td align="right">-27.64</td>
-<td align="right">150.02</td>
-<td align="right">18.46</td>
-<td align="right">13.04</td>
-<td align="right">23.37</td>
-<td align="right">1052.82</td>
-<td align="right">645.95</td>
-<td align="right">1742.55</td>
-</tr>
-<tr class="even">
-<td align="left">Corymbia calophylla</td>
-<td align="right">257</td>
-<td align="right">-33.38</td>
-<td align="right">121.07</td>
-<td align="right">16.09</td>
-<td align="right">14.35</td>
-<td align="right">18.63</td>
-<td align="right">792.78</td>
-<td align="right">404.40</td>
-<td align="right">1165.20</td>
-</tr>
-<tr class="odd">
-<td align="left">Eucalyptus globulus</td>
-<td align="right">583</td>
-<td align="right">-38.16</td>
-<td align="right">147.38</td>
-<td align="right">12.44</td>
-<td align="right">9.19</td>
-<td align="right">15.01</td>
-<td align="right">979.10</td>
-<td align="right">618.50</td>
-<td align="right">1603.25</td>
-</tr>
-</tbody>
-</table>
+<pre><code>## INFO [2017-05-29 15:43:52] WorldClim rasters read.
+## INFO [2017-05-29 15:43:57] ALA returned 10041 records for Eucalyptus tereticornis in 5.3 sec.
+## INFO [2017-05-29 15:44:04] Rasterized 10041 occurrences into 985 cells
+## INFO [2017-05-29 15:44:08] Extracted 985 records from WorldClim rasters.
+## INFO [2017-05-29 15:44:12] ALA returned 3817 records for Corymbia calophylla in 4.2 sec.
+## INFO [2017-05-29 15:44:19] Rasterized 3817 occurrences into 257 cells
+## INFO [2017-05-29 15:44:23] Extracted 257 records from WorldClim rasters.
+## INFO [2017-05-29 15:44:27] ALA returned 8529 records for Eucalyptus globulus in 4.1 sec.
+## INFO [2017-05-29 15:44:34] Rasterized 8529 occurrences into 583 cells
+## INFO [2017-05-29 15:44:38] Extracted 583 records from WorldClim rasters.</code></pre>
+<p>The <code>eucs</code> object is a dataframe with mean and 5, 95% quantiles of MAP and MAT across the (rasterized) range for each species.</p>
 <p>Or even all (rasterized) occurrences with climate data with <code>return=&quot;all&quot;</code>. Note that the result is a list of dataframes, one for every species.</p>
 <pre class="r"><code>eucs &lt;- worldclim_presence(c(&quot;Eucalyptus tereticornis&quot;,&quot;Corymbia calophylla&quot;,&quot;Eucalyptus globulus&quot;),
                              return=&quot;all&quot;)</code></pre>
-<pre><code>## INFO [2017-05-12 11:43:53] WorldClim rasters read.
-## INFO [2017-05-12 11:43:54] ALA returned 10041 records for Eucalyptus tereticornis in 0.3 sec.
-## INFO [2017-05-12 11:44:00] Rasterized 10041 occurrences into 985 cells
-## INFO [2017-05-12 11:44:04] Extracted 985 records from WorldClim rasters.
-## INFO [2017-05-12 11:44:04] ALA returned 3817 records for Corymbia calophylla in 0.1 sec.
-## INFO [2017-05-12 11:44:09] Rasterized 3817 occurrences into 257 cells
-## INFO [2017-05-12 11:44:13] Extracted 257 records from WorldClim rasters.
-## INFO [2017-05-12 11:44:13] ALA returned 8528 records for Eucalyptus globulus in 0.2 sec.
-## INFO [2017-05-12 11:44:20] Rasterized 8528 occurrences into 583 cells
-## INFO [2017-05-12 11:44:23] Extracted 583 records from WorldClim rasters.</code></pre>
+<pre><code>## INFO [2017-05-29 15:44:38] WorldClim rasters read.
+## INFO [2017-05-29 15:44:39] ALA returned 10041 records for Eucalyptus tereticornis in 0.4 sec.
+## INFO [2017-05-29 15:44:46] Rasterized 10041 occurrences into 985 cells
+## INFO [2017-05-29 15:44:50] Extracted 985 records from WorldClim rasters.
+## INFO [2017-05-29 15:44:50] ALA returned 3817 records for Corymbia calophylla in 0.2 sec.
+## INFO [2017-05-29 15:44:58] Rasterized 3817 occurrences into 257 cells
+## INFO [2017-05-29 15:45:01] Extracted 257 records from WorldClim rasters.
+## INFO [2017-05-29 15:45:02] ALA returned 8529 records for Eucalyptus globulus in 0.3 sec.
+## INFO [2017-05-29 15:45:09] Rasterized 8529 occurrences into 583 cells
+## INFO [2017-05-29 15:45:13] Extracted 583 records from WorldClim rasters.</code></pre>
 <p>We can use this list for a simple range map:</p>
 <pre class="r"><code>library(oz)
 oz()
@@ -214,7 +160,7 @@ for(i in seq_along(eucs)){
   with(eucs[[i]], points(longitude, latitude, pch=16, cex=0.2, col=palette()[i]))
 }
 legend(&quot;topleft&quot;, names(eucs), fill=palette(), cex=0.7)</code></pre>
-<p><img src="/post/2017-05-12-speciesmap_files/figure-html/unnamed-chunk-13-1.png" width="750" /></p>
+<p><img src="/post/2017-05-12-speciesmap_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
 <p>Or to plot simple climate envelopes - the combination of MAT and MAP where the species occur. We can draw data ellipses on top (although the relevance of these can be argued in this case), using <code>dataEllipse</code> from the <code>car</code> package.</p>
 <pre class="r"><code>plot(1, type=&#39;n&#39;, xlim=c(0,30), ylim=c(0,2500),
      xlab=&quot;MAT&quot;, ylab=&quot;MAP&quot;)
@@ -226,5 +172,5 @@ for(i in seq_along(eucs)){
   with(de, lines(x, y, col=palette()[i]))
 }
 legend(&quot;topleft&quot;, names(eucs), fill=palette(), cex=0.7)</code></pre>
-<p><img src="/post/2017-05-12-speciesmap_files/figure-html/unnamed-chunk-14-1.png" width="750" /></p>
+<p><img src="/post/2017-05-12-speciesmap_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
 </div>
