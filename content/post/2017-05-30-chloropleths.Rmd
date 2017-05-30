@@ -1,5 +1,5 @@
 ---
-title: "Three ways to make chloropleths in R"
+title: "Four ways to make chloropleths in R"
 author: "Remko Duursma"
 date: 2017-05-30
 categories: ["R"]
@@ -38,7 +38,8 @@ tb <- html_nodes(read_html(url), "table")
 
 # Read the third table (inspect tb to find out which you want)
 pop <- html_table(tb[3])[[1]]
-names(pop) <- c("Region","land_area","population","population_density","population_capital")
+names(pop) <- c("Region","land_area","population","population_density",
+                "population_capital")
 
 # We now have to do some cleaning up, as the data returned contains 
 # some numbers between [], and commas.
@@ -100,7 +101,8 @@ aus_shp@data <- merge(aus_shp@data, pop,
                       all=TRUE)
 
 # We define factor levels by cutting population into bins.
-aus_shp$colbin <- cut(aus_shp$population, 0:7, labels=c("0-1","1-2","2-3","3-4","4-5","5-6","6-7"))
+aus_shp$colbin <- cut(aus_shp$population, 0:7, 
+                      labels=c("0-1","1-2","2-3","3-4","4-5","5-6","6-7"))
 
 # Set the palette for coloring.
 library(RColorBrewer)
@@ -117,7 +119,7 @@ The next method to make a chloropleth map uses the `ggmap` package. In this appr
 
 Here we continue with the `aus_shp` object made above (including merging the population data).
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 # We will also need ggplot2 to add the polygons,
 # but we already loaded it above.
 library(ggmap)
@@ -205,7 +207,8 @@ leaflet(data = aus_shp) %>%
 
 
 <br>
-# Map 4 : oz and ggplot
+
+# Map 4 : oz and base graphics
 
 As mentioned in the introduction, the `maps` package can be used for chloropleth maps of the USA, or global country-level maps. However it does not contain data at state-level for Australia (or anywhere else). The `oz` package fills that void but unfortunately does not store the data in the same way, making it difficult or even impossible to use it for chloropleths.
 
@@ -224,7 +227,8 @@ If you inspect `oz2` you will notice it looks just like the result from `fortify
 
 ```{r, message=FALSE, warning=FALSE}
 oz_states <- data.frame(state=c("NSW", "NT","QLD", "SA",  "TAS", "VIC", "WA"),
-                        Region=c("New South Wales","Northern Territory","Queensland","South Australia",
+                        Region=c("New South Wales","Northern Territory",
+                                 "Queensland","South Australia",
                                  "Tasmania","Victoria","Western Australia"))
 
 # Merge oz2 with the states, and population data.
@@ -240,7 +244,33 @@ oz()
 with(subset(oz2, state == "NSW"), polygon(long, lat, col="grey"))
 ```
 
-And finally we can make a chloropleth map with `ggplot`, since `oz2` is a regular dataframe. Clearly this example is very similar to Map 2 - with the only difference that the source of spatial data is different, and so is the use of `ggplot` instead of `ggmap` (which can plot a nice google map tile behind the data).
+We can now make our chloropleth using just base graphics, using `polygon` for the coloured states, and `colorRampPalette` for a series of colours.
+
+A distinct advantage of this base plot is *speed* - all other examples shown here are very slow. Speed matters when we want a responsive figure, for example as part of a shiny app.
+
+```{r}
+# Plot a map of Australia
+# Make a bit more y-space so that the legend can fit.
+oz(ylim=c(-45, -10))
+
+# Cut population into a factor
+oz2$colbin <- cut(oz2$population, 0:7, 
+                  labels=c("0-1","1-2","2-3","3-4","4-5","5-6","6-7"))
+
+# Split the dataframe into a list, by region (state/territory)
+ozl <- split(oz2, oz2$Region)
+
+# Set the palette to colours from grey to red.
+palette(colorRampPalette(c("grey","red2"))(7))
+
+# For every region, plot the polygon.
+invisible(lapply(ozl, function(x)polygon(x$long, x$lat, col=x$colbin)))
+
+legend("bottom",  inset=c(0,-0.03),levels(oz2$colbin), fill=palette(), 
+       horiz=TRUE, cex=0.6, bty='n', title="Population (millions)")
+```
+
+And finally we can make the same map using `ggplot`, since `oz2` is a regular dataframe. Clearly this example is very similar to Map 2 - with the only difference that the source of spatial data is different, and so is the use of `ggplot` instead of `ggmap` (which can plot a nice google map tile behind the data).
 
 ```{r}
 ggplot(oz2) + 
@@ -251,6 +281,7 @@ ggplot(oz2) +
                       low = "darkgrey", high = "red2") + 
   theme(legend.position = "bottom")
 ```
+
 
 
 
