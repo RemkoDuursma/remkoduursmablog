@@ -1,0 +1,61 @@
+---
+title: "The cherriest pick"
+author: "Remko"
+date: "1 June 2017"
+output: 
+  html_document:
+    theme: flatly
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+In today's paper, three outliers were removed from a plot with n=7, so as to inflate the correlation coefficient (*r*) to 0.99. 
+
+What value of *r* do we expect between two normally distributed variables (where n=7), when we remove three points so that *r* is maximal?
+
+```{r}
+# Take 7 normally distributed points, try all combinations where we choose 4
+# points, and select the one with the highest correlation.
+cherrypick <- function(plotit=FALSE){
+  x <- rnorm(7, mean = 28, sd = 1)
+  y <- rnorm(7, mean = 26, sd = 1)
+  
+  m <- combn(7, 4)
+  cr <- apply(m, 2, function(i)cor(x[i],y[i]))
+  
+  if(plotit){ 
+    ii <- m[,which.max(abs(cr))]
+    
+    plot(x,y)
+    points(x[ii], y[ii], pch=19)
+    abline(lm(y[ii] ~ x[ii]), lty=5)
+  } else {
+    return(max(abs(cr)))
+  }
+}
+```
+
+A few examples with the above function, where the regression line uses the four solid points (and the remaining 3 are 'outliers').
+
+```{r}
+set.seed(1234)
+par(mfrow=c(3,3), mar=c(2.2,2.2,0.2,0.2), 
+    cex.axis=0.8,
+    cex.lab=0.8, mgp=c(1.2,0.4,0), tcl=0.2)
+for(i in 1:9)cherrypick(plotit=TRUE)
+```
+
+
+Now we simulate ten thousand times and get the distribution of the cherry-picked *r*.
+
+```{r}
+picks <- replicate(10^4, cherrypick())
+
+hist(picks, breaks=100, col="darkgrey", border="darkgrey",
+     xlab="Correlation coefficient n=4", main="")
+```
+
+Clearly high values of *r* are very likely. In this simulation, `r round(100 * length(picks[picks > 0.9]) / length(picks), 1)`% of simulated *r* values were above 0.9, and `r round(100 * length(picks[picks > 0.95]) / length(picks), 1)`% above 0.95.
+
