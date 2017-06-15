@@ -18,10 +18,20 @@
 		vertical-align: baseline;
 	}
 
-	article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section {
+	article, aside, details, figcaption, caption, figure, footer, header, hgroup, menu, nav, section {
 		display: block;
 	}
 
+	p.caption {
+		font-style: italic;
+	}
+	
+	figcaption {
+		font-style: bold;
+		font-size: 200%;
+	}
+	
+	
 	body {
 		line-height: 1;
 	}
